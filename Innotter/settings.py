@@ -14,12 +14,8 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-if os.getenv('DJANGO_SETTINGS_MODULE'):
-    os.environ['DJANGO_SETTINGS_MODULE'] = os.getenv('DJANGO_SETTINGS_MODULE')
 
 load_dotenv()
-env_path = Path('.')/'.env'
-load_dotenv(dotenv_path=env_path)
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -33,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-c2z4e-6d#%m4(*##kq($2m-o0_)64bjd#f3y(!yusdn_z9sd6v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG")
+DEBUG = os.getenv("DEBUG") == 'True'
 
 ALLOWED_HOSTS = []
 
