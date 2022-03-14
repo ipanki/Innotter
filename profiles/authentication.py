@@ -31,4 +31,3 @@ class SafeJWTAuthentication(BaseAuthentication):
         if not user.is_active:
             raise exceptions.AuthenticationFailed('User is inactive')
         return user, None
-

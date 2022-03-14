@@ -29,9 +29,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG") == 'True'
+DEBUG = os.getenv("DEBUG") == 'False'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -154,4 +154,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'profiles.User'
 
-REFRESH_TOKEN_SECRET = 'gfhfghdsgg5645ktergGHWEQ56glkdfglkdsfgdfn'
+REFRESH_TOKEN_SECRET = os.getenv('REFRESH_TOKEN_SECRET')

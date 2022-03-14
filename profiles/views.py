@@ -5,9 +5,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework.decorators import api_view, permission_classes
 
-from profiles.utils import generate_access_token, generate_refresh_token
+from profiles.utils import generate_access_token, generate_refresh_token, login_user
 
-from .serializers import RegistrationSerializer, CreatePageSerializer, ShowPageSerializer
+from profiles.serializers import RegistrationSerializer, CreatePageSerializer, ShowPageSerializer
 from profiles.models import User, Page
 
 
@@ -34,24 +34,7 @@ class RegistrationViewSet(ViewSet):
     def login(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        if (username is None) or (password is None):
-            raise exceptions.AuthenticationFailed(
-                'username and password required')
-
-        user = User.objects.filter(username=username).first()
-        if user is None:
-            raise exceptions.AuthenticationFailed('User not found')
-        if not user.check_password(password):
-            raise exceptions.AuthenticationFailed('Wrong password')
-
-        access_token = generate_access_token(user)
-        refresh_token = generate_refresh_token(user)
-
-        data = {
-            'access_token': access_token,
-            'user': user.id,
-            'refresh_token' : refresh_token,
-        }
+        data = login_user(username, password)
 
         return Response(data=data, status=status.HTTP_201_CREATED)
 

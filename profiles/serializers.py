@@ -1,5 +1,5 @@
-from django.contrib.auth import authenticate
 from rest_framework import serializers
+from drf_writable_nested import WritableNestedModelSerializer
 
 from profiles.models import User, Page, Tag
 
@@ -12,8 +12,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         min_length=8,
         write_only=True
     )
-    role = serializers.CharField(read_only=True)
-    image_s3_path = serializers.CharField(max_length=200, read_only=True)
 
     class Meta:
         model = User
@@ -30,7 +28,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('name',)
 
 
-class CreatePageSerializer(serializers.ModelSerializer):
+class CreatePageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     tags = TagSerializer(many=True)
 
     class Meta:
@@ -38,7 +36,7 @@ class CreatePageSerializer(serializers.ModelSerializer):
         fields = ('name', 'tags', 'description', 'image', 'is_private')
 
 
-class ShowPageSerializer(serializers.ModelSerializer):
+class ShowPageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     tags = TagSerializer(many=True)
 
     class Meta:

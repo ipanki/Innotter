@@ -34,6 +34,7 @@ urllib3 = "1.26.8"
 wcwidth = "0.2.5"
 wrapt = "1.13.3"
 uuid = "*"
+drf-writable-nested = "*"
 
 [dev-packages]
 autoflake = "1.4"
