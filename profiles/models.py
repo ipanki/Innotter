@@ -1,5 +1,7 @@
+import uuid as uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import uuid
 
 
 class User(AbstractUser):
@@ -22,7 +24,7 @@ class Tag(models.Model):
 
 class Page(models.Model):
     name = models.CharField(max_length=80)
-    uuid = models.CharField(max_length=30, unique=True)
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     description = models.TextField()
     tags = models.ManyToManyField('profiles.Tag', related_name='pages')
 

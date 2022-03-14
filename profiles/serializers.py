@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from profiles.models import User
+from profiles.models import User, Page, Tag
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -17,15 +17,30 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'role', 'image_s3_path']
+        fields = ('email', 'username', 'password', 'role', 'image_s3_path')
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
 
-class LoginSerializer(serializers.ModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
-        fields = ['email', 'username', 'password']
+        model = Tag
+        fields = ('name',)
 
+
+class CreatePageSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Page
+        fields = ('name', 'tags', 'description', 'image', 'is_private')
+
+
+class ShowPageSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Page
+        fields = ('id', 'uuid', 'name', 'tags', 'description', 'image', 'is_private')
