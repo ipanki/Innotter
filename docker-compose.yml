@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  postgres:
+    container_name: innotter
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    volumes:
+      - ./.var/postgresql:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
