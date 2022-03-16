@@ -3,11 +3,10 @@ from rest_framework import routers
 
 from profiles import views
 
-app_name = 'profiles'
 router = routers.DefaultRouter()
-router.register('innotter', views.RegistrationViewSet, "innotter")
+router.register('profiles', views.RegistrationViewSet, "profiles")
 
 urlpatterns = [
-    path('api/', include((router.urls, 'innotter'), namespace='profiles')),
+    path('', include((router.urls, 'profiles'), namespace='profiles')),
 ]
 

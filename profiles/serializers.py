@@ -41,4 +41,12 @@ class ShowPageSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     class Meta:
         model = Page
-        fields = ('id', 'uuid', 'name', 'tags', 'description', 'image', 'is_private')
+        fields = ('owner', 'id', 'uuid', 'name', 'tags', 'description', 'image', 'is_private')
+
+
+class EditPageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Page
+        fields = ('name', 'tags', 'description', 'image', 'is_private')

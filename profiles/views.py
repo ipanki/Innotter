@@ -1,4 +1,5 @@
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework import exceptions, status
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ViewSet
@@ -7,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 
 from profiles.utils import generate_access_token, generate_refresh_token, login_user
 
-from profiles.serializers import RegistrationSerializer, CreatePageSerializer, ShowPageSerializer
+from profiles.serializers import RegistrationSerializer, CreatePageSerializer, ShowPageSerializer, EditPageSerializer
 from profiles.models import User, Page
 
 
@@ -38,10 +39,11 @@ class RegistrationViewSet(ViewSet):
 
         return Response(data=data, status=status.HTTP_201_CREATED)
 
+    @permission_classes([IsAuthenticated])
     def list(self, request):
         """List all issues"""
-        issues = Page.objects.all()
-        serializer = ShowPageSerializer(issues, many=True)
+        pages = Page.objects.all() if request.user.is_superuser else Page.objects.filter(owner=request.user)
+        serializer = ShowPageSerializer(pages, many=True)
         return Response({'data': serializer.data})
 
     @permission_classes([IsAuthenticated])
@@ -51,6 +53,14 @@ class RegistrationViewSet(ViewSet):
         page.is_valid(raise_exception=True)
         profile = page.save(owner=request.user)
         return Response(status=status.HTTP_201_CREATED, data=CreatePageSerializer(profile).data)
+
+    @permission_classes([IsAuthenticated])
+    def update(self, request, pk):
+        page = get_object_or_404(Page, pk=pk)
+        form = EditPageSerializer(data=request.data, instance=page, partial=True)
+        form.is_valid(raise_exception=True)
+        profile = form.save()
+        return Response(status=status.HTTP_201_CREATED, data=EditPageSerializer(profile).data)
 
 
 
