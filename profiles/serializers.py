@@ -28,6 +28,13 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('name',)
 
 
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'id')
+
+
 class CreatePageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     tags = TagSerializer(many=True)
 
@@ -38,10 +45,11 @@ class CreatePageSerializer(WritableNestedModelSerializer, serializers.ModelSeria
 
 class ShowPageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     tags = TagSerializer(many=True)
+    followers = UserSerializer(many=True)
 
     class Meta:
         model = Page
-        fields = ('owner', 'id', 'uuid', 'name', 'tags', 'description', 'image', 'is_private')
+        fields = ('owner', 'id', 'uuid', 'name', 'tags', 'description', 'image', 'followers', 'is_private')
 
 
 class EditPageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -50,3 +58,12 @@ class EditPageSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
     class Meta:
         model = Page
         fields = ('name', 'tags', 'description', 'image', 'is_private')
+
+
+class ShowFollowerSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+    follow_requests = UserSerializer(many=True)
+
+    class Meta:
+        model = Page
+        fields = ('follow_requests',)
+

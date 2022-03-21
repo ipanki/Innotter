@@ -17,6 +17,9 @@ class User(AbstractUser):
 
     is_blocked = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f'Name={self.username}'
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=30)
@@ -29,12 +32,12 @@ class Page(models.Model):
     tags = models.ManyToManyField('profiles.Tag', related_name='pages')
 
     owner = models.ForeignKey('profiles.User', on_delete=models.CASCADE, related_name='pages')
-    followers = models.ManyToManyField('profiles.User', related_name='follows')
+    followers = models.ManyToManyField('profiles.User', related_name='followed_pages')
 
     image = models.URLField(null=True, blank=True)
 
     is_private = models.BooleanField(default=False)
-    follow_requests = models.ManyToManyField('profiles.User', related_name='requests')
+    follow_requests = models.ManyToManyField('profiles.User', related_name='follow_requests')
 
     unblock_date = models.DateTimeField(null=True, blank=True)
 
