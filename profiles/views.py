@@ -132,3 +132,33 @@ class SubscriptionViewSet(ViewSet):
 
         return Response(status=status.HTTP_200_OK, data='Requests accepted')
 
+    @action(detail=True, methods=['post'], url_path='deny-request')
+    def deny_following_request(self, request, pk):
+        """Deny 1 subscription request"""
+        page = get_object_or_404(Page, pk=pk)
+
+        if page.owner != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        user_id = request.data.get('user_id')
+
+        if user_id is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data='user_id is required')
+
+        for user in page.follow_requests.all():
+            if user.id == user_id:
+                page.follow_requests.remove(user)
+                return Response(status=status.HTTP_200_OK, data='Request denied')
+
+    @action(detail=True, methods=['post'], url_path='deny-requests')
+    def deny_following_requests(self, request, pk):
+        """Deny all subscription requests"""
+        page = get_object_or_404(Page, pk=pk)
+
+        if page.owner != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        for user in page.follow_requests.all():
+            page.follow_requests.remove(user)
+
+        return Response(status=status.HTTP_200_OK, data='Requests denied')
