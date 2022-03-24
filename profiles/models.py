@@ -45,8 +45,13 @@ class Page(models.Model):
 class Post(models.Model):
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name='posts')
     content = models.CharField(max_length=180)
+    likes = models.ManyToManyField('profiles.Page', blank=True, related_name='post_likes')
 
     reply_to = models.ForeignKey('profiles.Post', on_delete=models.SET_NULL, null=True, related_name='replies')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_likes(self):
+        return self.likes.count()

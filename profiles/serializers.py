@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 
-from profiles.models import User, Page, Tag
+from profiles.models import User, Page, Tag, Post
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -66,4 +66,32 @@ class ShowFollowerSerializer(WritableNestedModelSerializer, serializers.ModelSer
     class Meta:
         model = Page
         fields = ('follow_requests',)
+
+
+class PageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Page
+        fields = ('owner', 'id')
+
+
+class ShowPostSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields = ('page', 'id', 'content', 'created_at', 'updated_at')
+
+
+class CreatePostSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields = ('content',)
+
+
+class EditPostSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields = ('content', 'updated_at')
 
