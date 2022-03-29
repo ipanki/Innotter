@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 
-from profiles.models import User, Page, Tag, Post
+from profiles.models import User, Page, Tag, Post, Comment
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -75,23 +75,38 @@ class PageSerializer(serializers.ModelSerializer):
         fields = ('owner', 'id')
 
 
-class ShowPostSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class ShowPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
         fields = ('page', 'id', 'content', 'created_at', 'updated_at')
 
 
-class CreatePostSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class CreatePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
         fields = ('content',)
 
 
-class EditPostSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+class EditPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
         fields = ('content', 'updated_at')
+
+
+class ReplyToPostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = ('page_id', 'comment',)
+
+
+class CommentPostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = ('reply_to', 'comment')
+
 

@@ -18,7 +18,7 @@ class User(AbstractUser):
     is_blocked = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'Name={self.username}'
+        return self.username
 
 
 class Tag(models.Model):
@@ -39,6 +39,7 @@ class Page(models.Model):
     is_private = models.BooleanField(default=False)
     follow_requests = models.ManyToManyField('profiles.User', related_name='follow_requests')
 
+    is_blocked = models.BooleanField(default=False)
     unblock_date = models.DateTimeField(null=True, blank=True)
 
 
@@ -47,11 +48,18 @@ class Post(models.Model):
     content = models.CharField(max_length=180)
     likes = models.ManyToManyField('profiles.Page', blank=True, related_name='post_likes')
 
-    reply_to = models.ForeignKey('profiles.Post', on_delete=models.SET_NULL, null=True, related_name='replies')
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def total_likes(self):
         return self.likes.count()
+
+
+class Comment(models.Model):
+    page = models.ForeignKey(Page, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=180)
+    reply_to = models.ForeignKey('profiles.Post', on_delete=models.SET_NULL, null=True, related_name='replies')
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+

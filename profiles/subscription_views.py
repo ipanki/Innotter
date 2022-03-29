@@ -1,16 +1,16 @@
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
+from profiles.permissions import SubscribePermission, check_owner_page
 
 from profiles.serializers import ShowFollowerSerializer
 from profiles.models import Page
 
 
 class SubscriptionViewSet(ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (SubscribePermission,)
 
     @action(detail=True, methods=['post'])
     def subscribe(self, request, pk):
@@ -30,6 +30,7 @@ class SubscriptionViewSet(ViewSet):
     @action(detail=True, methods=['get'], url_path='requests')
     def show_following_requests(self, request, pk):
         page = get_object_or_404(Page, pk=pk)
+        check_owner_page(page, request.user)
         serializer = ShowFollowerSerializer(page)
         return Response({'data': serializer.data})
 
@@ -37,10 +38,7 @@ class SubscriptionViewSet(ViewSet):
     def accept_following_request(self, request, pk):
         """Single subscription approval"""
         page = get_object_or_404(Page, pk=pk)
-
-        if page.owner != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
+        check_owner_page(page, request.user)
         user_id = request.data.get('user_id')
 
         if user_id is None:
@@ -58,9 +56,7 @@ class SubscriptionViewSet(ViewSet):
     def accept_following_requests(self, request, pk):
         """Accept all subscriptions"""
         page = get_object_or_404(Page, pk=pk)
-
-        if page.owner != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        check_owner_page(page, request.user)
 
         if page.follow_requests.all() is None:
             return Response(status=status.HTTP_400_BAD_REQUEST, data='Requests not found')
@@ -75,10 +71,7 @@ class SubscriptionViewSet(ViewSet):
     def deny_following_request(self, request, pk):
         """Deny 1 subscription request"""
         page = get_object_or_404(Page, pk=pk)
-
-        if page.owner != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
+        check_owner_page(page, request.user)
         user_id = request.data.get('user_id')
 
         if user_id is None:
@@ -93,9 +86,7 @@ class SubscriptionViewSet(ViewSet):
     def deny_following_requests(self, request, pk):
         """Deny all subscription requests"""
         page = get_object_or_404(Page, pk=pk)
-
-        if page.owner != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        check_owner_page(page, request.user)
 
         for user in page.follow_requests.all():
             page.follow_requests.remove(user)

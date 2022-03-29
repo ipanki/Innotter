@@ -1,16 +1,13 @@
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 from rest_framework import exceptions, status
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
 
-from profiles.utils import generate_access_token, generate_refresh_token, login_user
+from profiles.utils import login_user
 
-from profiles.serializers import RegistrationSerializer, CreatePageSerializer, ShowPageSerializer, EditPageSerializer, \
-    ShowFollowerSerializer
-from profiles.models import User, Page
+from profiles.serializers import RegistrationSerializer
 
 
 class RegistrationViewSet(ViewSet):
