@@ -16,17 +16,12 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['post'])
     def subscribe(self, request, pk):
         page = get_object_or_404(Page, pk=pk)
-
-        try:
-            if page.is_private:
-                page.follow_requests.add(request.user)
-                return Response(status=status.HTTP_201_CREATED, data="Subscription request sent")
-            else:
-                page.followers.add(request.user)
-                return Response(status=status.HTTP_201_CREATED, data="Subscribed")
-
-        except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data=str(e))
+        if page.is_private:
+            page.follow_requests.add(request.user)
+            return Response(status=status.HTTP_201_CREATED, data="Subscription request sent")
+        else:
+            page.followers.add(request.user)
+            return Response(status=status.HTTP_201_CREATED, data="Subscribed")
 
     @action(detail=True, methods=['get'], url_path='requests')
     def show_following_requests(self, request, pk):
@@ -60,7 +55,7 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
         page = Page.objects.prefetch_related('follow_requests').get(id=pk)
         check_owner_page(page, request.user)
 
-        if page.follow_requests.all() is None:
+        if not page.follow_requests.all():
             return Response(status=status.HTTP_400_BAD_REQUEST, data='Requests not found')
 
         for user in page.follow_requests.all():

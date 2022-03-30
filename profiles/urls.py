@@ -12,10 +12,6 @@ router.register('admin-section', admin_views.AdminViewSet, "admins")
 
 urlpatterns = [
     path('', include((router.urls, 'profiles'), namespace='profiles')),
-    path('', include((router.urls, 'pages'), namespace='pages')),
-    path('', include((router.urls, 'subscriptions'), namespace='subscriptions')),
-    path('', include((router.urls, 'posts'), namespace='posts')),
-    path('', include((router.urls, 'admin-section'), namespace='admins')),
 
 ]
 
