@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import exceptions, status
 from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import ViewSet
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.decorators import permission_classes
 
@@ -10,7 +10,7 @@ from profiles.utils import login_user
 from profiles.serializers import RegistrationSerializer
 
 
-class RegistrationViewSet(ViewSet):
+class RegistrationViewSet(viewsets.GenericViewSet):
     """
     Разрешить всем пользователям (аутентифицированным и нет) доступ к данному эндпоинту.
     """

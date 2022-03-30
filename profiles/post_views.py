@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
+from rest_framework import mixins, viewsets
 from profiles.permissions import PostPermission, check_owner_page
 
 from profiles.serializers import ShowPostSerializer, CreatePostSerializer, EditPostSerializer, \
@@ -10,39 +11,30 @@ from profiles.serializers import ShowPostSerializer, CreatePostSerializer, EditP
 from profiles.models import Post, Page, User
 
 
-class PostViewSet(ViewSet):
+class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin,
+                  mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    serializer_class = ShowPostSerializer
+    queryset = Post.objects
     permission_classes = (PostPermission,)
 
-    def list(self, request):
-        """List all post"""
-        posts = Post.objects.all() if request.user.is_superuser or request.user.role == User.Roles.MODERATOR \
-            else Post.objects.filter(page__owner=request.user)
-        serializer = ShowPostSerializer(posts, many=True)
-        return Response({'data': serializer.data})
+    def get_queryset(self):
+        if self.action == "list":
+            if not (self.request.user.is_superuser or self.request.user.role == User.Roles.MODERATOR):
+                return self.queryset.filter(owner=self.request.user)
+        return self.queryset.all()
 
-    @action(detail=True, methods=['post'], url_path='create-post')
-    def create_post(self, request, pk):
-        """Create a new post"""
-        page = get_object_or_404(Page, pk=pk)
-        check_owner_page(page, request.user)
-        post = CreatePostSerializer(data=request.data)
-        post.is_valid(raise_exception=True)
-        new_post = post.save(page=page)
-        return Response(status=status.HTTP_201_CREATED, data=ShowPostSerializer(new_post).data)
+    def get_serializer_class(self):
+        if self.action == 'update':
+            return EditPostSerializer
+        if self.action == 'create':
+            return CreatePostSerializer
+        return super().get_serializer_class()
 
-    def update(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
-        self.check_object_permissions(request, post)
-        form = EditPostSerializer(data=request.data, instance=post, partial=True)
-        form.is_valid(raise_exception=True)
-        profile = form.save()
-        return Response(status=status.HTTP_201_CREATED, data=EditPostSerializer(profile).data)
-
-    def destroy(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
-        self.check_object_permissions(request, post)
-        post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def perform_create(self, serializer):
+        page_id = serializer.validated_data.get('page_id')
+        page = get_object_or_404(Page, pk=page_id)
+        check_owner_page(page, self.request.user)
+        serializer.save()
 
     @action(detail=True, methods=['post'], url_path='like')
     def post_like(self, request, pk):

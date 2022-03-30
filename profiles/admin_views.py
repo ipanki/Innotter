@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.viewsets import ViewSet
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from profiles.permissions import AdminPermission
 import datetime
@@ -9,7 +9,7 @@ import datetime
 from profiles.models import Page, User
 
 
-class AdminViewSet(ViewSet):
+class AdminViewSet(viewsets.GenericViewSet):
     permission_classes = (AdminPermission,)
 
     @action(detail=True, methods=['post'], url_path='block-user')

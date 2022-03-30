@@ -1,7 +1,9 @@
-from rest_framework import serializers
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers, request
 from drf_writable_nested import WritableNestedModelSerializer
 
 from profiles.models import User, Page, Tag, Post, Comment
+from profiles.permissions import check_owner_page
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -83,10 +85,22 @@ class ShowPostSerializer(serializers.ModelSerializer):
 
 
 class CreatePostSerializer(serializers.ModelSerializer):
+    page_id = serializers.IntegerField()
 
     class Meta:
         model = Post
-        fields = ('content',)
+        fields = ('page_id', 'content',)
+
+    # def validate(self, attrs):
+    #     print(dict(attrs))
+    #     page_id = attrs.data.get('page')
+    #     page = get_object_or_404(Page, pk=page_id)
+    #     check_owner_page(page_id, attrs.request.user)
+    #     return attrs
+
+    # def create(self, validated_data):
+    #     obj = super(CreatePostSerializer, self).create(validated_data)
+    #     return obj
 
 
 class EditPostSerializer(serializers.ModelSerializer):

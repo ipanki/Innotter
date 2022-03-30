@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from profiles.permissions import SubscribePermission, check_owner_page
@@ -9,7 +10,7 @@ from profiles.serializers import ShowFollowerSerializer
 from profiles.models import Page
 
 
-class SubscriptionViewSet(ViewSet):
+class SubscriptionViewSet(viewsets.GenericViewSet):
     permission_classes = (SubscribePermission,)
 
     @action(detail=True, methods=['post'])
@@ -37,7 +38,8 @@ class SubscriptionViewSet(ViewSet):
     @action(detail=True, methods=['post'], url_path='accept-request')
     def accept_following_request(self, request, pk):
         """Single subscription approval"""
-        page = get_object_or_404(Page, pk=pk)
+        #page = get_object_or_404(Page, pk=pk)
+        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
         check_owner_page(page, request.user)
         user_id = request.data.get('user_id')
 
@@ -55,7 +57,7 @@ class SubscriptionViewSet(ViewSet):
     @action(detail=True, methods=['post'], url_path='accept-requests')
     def accept_following_requests(self, request, pk):
         """Accept all subscriptions"""
-        page = get_object_or_404(Page, pk=pk)
+        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
         check_owner_page(page, request.user)
 
         if page.follow_requests.all() is None:
@@ -70,7 +72,7 @@ class SubscriptionViewSet(ViewSet):
     @action(detail=True, methods=['post'], url_path='deny-request')
     def deny_following_request(self, request, pk):
         """Deny 1 subscription request"""
-        page = get_object_or_404(Page, pk=pk)
+        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
         check_owner_page(page, request.user)
         user_id = request.data.get('user_id')
 
@@ -85,7 +87,8 @@ class SubscriptionViewSet(ViewSet):
     @action(detail=True, methods=['post'], url_path='deny-requests')
     def deny_following_requests(self, request, pk):
         """Deny all subscription requests"""
-        page = get_object_or_404(Page, pk=pk)
+        #page = get_object_or_404(Page, pk=pk)
+        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
         check_owner_page(page, request.user)
 
         for user in page.follow_requests.all():
