@@ -33,8 +33,10 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['post'], url_path='accept-request')
     def accept_following_request(self, request, pk):
         """Single subscription approval"""
-        #page = get_object_or_404(Page, pk=pk)
-        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        if Page.objects.filter(id=pk).exists():
+            page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND, data='Page not found')
         check_owner_page(page, request.user)
         user_id = request.data.get('user_id')
 
@@ -52,7 +54,11 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['post'], url_path='accept-requests')
     def accept_following_requests(self, request, pk):
         """Accept all subscriptions"""
-        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        if Page.objects.filter(id=pk).exists():
+            page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND, data='Page not found')
+
         check_owner_page(page, request.user)
 
         if not page.follow_requests.all():
@@ -67,7 +73,11 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['post'], url_path='deny-request')
     def deny_following_request(self, request, pk):
         """Deny 1 subscription request"""
-        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        if Page.objects.filter(id=pk).exists():
+            page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND, data='Page not found')
+
         check_owner_page(page, request.user)
         user_id = request.data.get('user_id')
 
@@ -82,8 +92,11 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['post'], url_path='deny-requests')
     def deny_following_requests(self, request, pk):
         """Deny all subscription requests"""
-        #page = get_object_or_404(Page, pk=pk)
-        page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        if Page.objects.filter(id=pk).exists():
+            page = Page.objects.prefetch_related('follow_requests').get(id=pk)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND, data='Page not found')
+
         check_owner_page(page, request.user)
 
         for user in page.follow_requests.all():
