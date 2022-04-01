@@ -6,7 +6,7 @@ def send_notification(page):
     for user in page.followers.all():
         send_mail(
             'New post',
-            f"{user} Posted new post",
+            f"{page.owner} Posted new post",
             'daniil.panko@gmail.com',
             [f'{user.email}'],
             fail_silently=False, )
