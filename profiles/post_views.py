@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework import mixins, viewsets
 from profiles.permissions import PostPermission, check_owner_page
 from profiles.send_mails import send_notification
+from django.db.models import Q
 
 from profiles.serializers import ShowPostSerializer, CreatePostSerializer, EditPostSerializer, \
     ReplyToPostSerializer, CommentPostSerializer
@@ -85,3 +86,10 @@ class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
         new_comment = comment.save(page=page, reply_to=post)
         return Response(status=status.HTTP_201_CREATED, data=CommentPostSerializer(new_comment).data)
 
+    @action(detail=True, methods=['post'], url_path='news')
+    def get_posts_of_subscribed_pages(self, request, pk):
+        page = get_object_or_404(Page, pk=pk)
+        check_owner_page(page, request.user)
+        all_posts = Post.objects.filter(Q(page__followers=request.user) | Q(page__owner=request.user))
+        serializer = ShowPostSerializer(all_posts, many=True)
+        return Response(status=status.HTTP_201_CREATED, data=serializer.data)

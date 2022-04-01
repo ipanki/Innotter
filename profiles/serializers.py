@@ -1,9 +1,7 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers, request
+from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 
 from profiles.models import User, Page, Tag, Post, Comment
-from profiles.permissions import check_owner_page
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -51,7 +49,7 @@ class ShowPageSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     class Meta:
         model = Page
-        fields = ('owner', 'id', 'uuid', 'name', 'tags', 'description', 'image', 'followers', 'is_private')
+        fields = ('owner', 'id', 'uuid', 'name', 'tags', 'description', 'image', 'followers', 'is_private', 'is_blocked', 'unblock_date')
 
 
 class EditPageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
@@ -91,17 +89,6 @@ class CreatePostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('page_id', 'content',)
 
-    # def validate(self, attrs):
-    #     print(dict(attrs))
-    #     page_id = attrs.data.get('page')
-    #     page = get_object_or_404(Page, pk=page_id)
-    #     check_owner_page(page_id, attrs.request.user)
-    #     return attrs
-
-    # def create(self, validated_data):
-    #     obj = super(CreatePostSerializer, self).create(validated_data)
-    #     return obj
-
 
 class EditPostSerializer(serializers.ModelSerializer):
 
@@ -124,3 +111,8 @@ class CommentPostSerializer(serializers.ModelSerializer):
         fields = ('reply_to', 'comment')
 
 
+class AdminSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Page
+        fields = ('is_blocked', 'unblock_date')
