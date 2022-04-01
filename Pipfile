@@ -35,6 +35,8 @@ wcwidth = "0.2.5"
 wrapt = "1.13.3"
 uuid = "*"
 drf-writable-nested = "*"
+boto3 = "*"
+django-ses = "*"
 
 [dev-packages]
 autoflake = "1.4"

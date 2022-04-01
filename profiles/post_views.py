@@ -1,10 +1,10 @@
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from rest_framework import mixins, viewsets
 from profiles.permissions import PostPermission, check_owner_page
+from profiles.send_mails import send_notification
 
 from profiles.serializers import ShowPostSerializer, CreatePostSerializer, EditPostSerializer, \
     ReplyToPostSerializer, CommentPostSerializer
@@ -34,6 +34,7 @@ class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
         page_id = serializer.validated_data.get('page_id')
         page = get_object_or_404(Page, pk=page_id)
         check_owner_page(page, self.request.user)
+        send_notification(page)
         serializer.save()
 
     @action(detail=True, methods=['post'], url_path='like')

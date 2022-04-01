@@ -2,7 +2,6 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.viewsets import ViewSet
 from rest_framework.decorators import action
 from profiles.permissions import SubscribePermission, check_owner_page
 
@@ -12,6 +11,7 @@ from profiles.models import Page
 
 class SubscriptionViewSet(viewsets.GenericViewSet):
     permission_classes = (SubscribePermission,)
+    serializer_class = ShowFollowerSerializer
 
     @action(detail=True, methods=['post'])
     def subscribe(self, request, pk):
@@ -83,7 +83,6 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
 
         if user_id is None:
             return Response(status=status.HTTP_400_BAD_REQUEST, data='user_id is required')
-
         for user in page.follow_requests.all():
             if user.id == user_id:
                 page.follow_requests.remove(user)
