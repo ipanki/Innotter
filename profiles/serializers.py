@@ -5,8 +5,6 @@ from profiles.models import User, Page, Tag, Post, Comment
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    """ Сериализация регистрации пользователя и создания нового. """
-
     password = serializers.CharField(
         max_length=128,
         min_length=8,
@@ -49,7 +47,7 @@ class ShowPageSerializer(WritableNestedModelSerializer, serializers.ModelSeriali
 
     class Meta:
         model = Page
-        fields = ('owner', 'id', 'uuid', 'name', 'tags', 'description', 'image', 'followers', 'is_private', 'is_blocked', 'unblock_date')
+        fields = ('owner', 'id', 'uuid', 'name', 'tags', 'description', 'image', 'followers', 'is_private')
 
 
 class EditPageSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):

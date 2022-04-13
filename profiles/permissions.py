@@ -30,12 +30,10 @@ class PostPermission(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, post):
-        if view.action in ['update', 'destroy']:
+        if view.action in ['update']:
             return post.page.owner == request.user
         elif view.action in ['destroy']:
-            return request.user.is_staff
-        elif view.action in ['destroy']:
-            return request.user.role == User.Roles.MODERATOR
+            return post.page.owner == request.user or request.user.is_staff or request.user.role == User.Roles.MODERATOR
         return False
 
 
@@ -50,4 +48,7 @@ class AdminPermission(BasePermission):
 def check_owner_page(page, request_user):
     if page.owner != request_user:
         raise exceptions.PermissionDenied(detail="Permission denied")
+
+    if page.is_blocked:
+        return Response(status=status.HTTP_400_BAD_REQUEST, data='You page is blocked')
 

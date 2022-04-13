@@ -37,6 +37,12 @@ uuid = "*"
 drf-writable-nested = "*"
 boto3 = "*"
 django-ses = "*"
+python-magic-bin = "*"
+fastapi = "*"
+uvicorn = "*"
+pydantic = "*"
+pika = "*"
+rabbitmq = "*"
 
 [dev-packages]
 autoflake = "1.4"

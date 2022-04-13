@@ -6,6 +6,8 @@ from rest_framework import mixins, viewsets
 from profiles.permissions import PostPermission, check_owner_page
 from profiles.send_mails import send_notification
 from django.db.models import Q
+from profiles.presigned_url import generate_presigned_url, upload_image
+from profiles.producer import publish_create_page_event, publish_update_posts_counter_event
 
 from profiles.serializers import ShowPostSerializer, CreatePostSerializer, EditPostSerializer, \
     ReplyToPostSerializer, CommentPostSerializer
@@ -35,7 +37,11 @@ class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
         page_id = serializer.validated_data.get('page_id')
         page = get_object_or_404(Page, pk=page_id)
         check_owner_page(page, self.request.user)
+        image_s3 = self.request.FILES["image"]
+        filename = upload_image(image_s3)
+        presigned_url = generate_presigned_url(filename)
         send_notification(page)
+        publish_update_posts_counter_event(page)
         serializer.save()
 
     @action(detail=True, methods=['post'], url_path='like')
