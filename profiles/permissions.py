@@ -11,7 +11,7 @@ class PagePermission(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        if view.action in ['list', 'create', 'update', 'retrieve']:
+        if view.action in ['list', 'create', 'update', 'partial_update', 'retrieve']:
             return obj.owner == request.user
         elif view.action in ['retrieve']:
             return request.user.is_staff
@@ -30,7 +30,7 @@ class PostPermission(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, post):
-        if view.action in ['update']:
+        if view.action in ['update', 'partial_update']:
             return post.page.owner == request.user
         elif view.action in ['destroy']:
             return post.page.owner == request.user or request.user.is_staff or request.user.role == User.Roles.MODERATOR

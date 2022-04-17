@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from profiles.permissions import SubscribePermission, check_owner_page
+from profiles.producer import publish_follower_created_event
 
 from profiles.serializers import ShowFollowerSerializer
 from profiles.models import Page
@@ -21,6 +22,7 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
             return Response(status=status.HTTP_201_CREATED, data="Subscription request sent")
         else:
             page.followers.add(request.user)
+            publish_follower_created_event(page)
             return Response(status=status.HTTP_201_CREATED, data="Subscribed")
 
     @action(detail=True, methods=['get'], url_path='requests')
@@ -47,6 +49,7 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
             if user.id == user_id:
                 page.followers.add(user)
                 page.follow_requests.remove(user)
+                publish_follower_created_event(page)
                 return Response(status=status.HTTP_200_OK, data='Request accepted')
 
         return Response(status=status.HTTP_404_NOT_FOUND, data='Request not found')
@@ -67,6 +70,7 @@ class SubscriptionViewSet(viewsets.GenericViewSet):
         for user in page.follow_requests.all():
             page.followers.add(user)
             page.follow_requests.remove(user)
+            publish_follower_created_event(page)
 
         return Response(status=status.HTTP_200_OK, data='Requests accepted')
 

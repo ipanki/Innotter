@@ -1,7 +1,6 @@
 version: "3.7"
 services:
   postgres:
-    container_name: innotter
     image: postgres:12-alpine
     environment:
       - POSTGRES_DB
@@ -11,3 +10,22 @@ services:
       - ./.var/postgresql:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  app:
+    container_name: innotter-app
+    build: .
+    command: /bin/sh -c "./entrypoint.sh"
+    volumes:
+    - .:/app
+    ports:
+    - "8000:8000"
+    environment:
+    - POSTGRES_HOST=postgres
+    depends_on:
+    - postgres
+    - celery
+  celery:
+    container_name: innotter-celery
+    build: .
+    command: sh -c "celery -A Innotter worker"
+    volumes:
+    - .:/app

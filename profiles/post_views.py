@@ -6,12 +6,12 @@ from rest_framework import mixins, viewsets
 from profiles.permissions import PostPermission, check_owner_page
 from profiles.send_mails import send_notification
 from django.db.models import Q
-from profiles.presigned_url import generate_presigned_url, upload_image
-from profiles.producer import publish_create_page_event, publish_update_posts_counter_event
+from profiles.producer import publish_post_created_event, publish_like_created_event, publish_like_deleted_event
 
 from profiles.serializers import ShowPostSerializer, CreatePostSerializer, EditPostSerializer, \
     ReplyToPostSerializer, CommentPostSerializer
 from profiles.models import Post, Page, User
+from profiles.tasks import send_email
 
 
 class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin,
@@ -37,12 +37,10 @@ class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
         page_id = serializer.validated_data.get('page_id')
         page = get_object_or_404(Page, pk=page_id)
         check_owner_page(page, self.request.user)
-        image_s3 = self.request.FILES["image"]
-        filename = upload_image(image_s3)
-        presigned_url = generate_presigned_url(filename)
-        send_notification(page)
-        publish_update_posts_counter_event(page)
         serializer.save()
+        publish_post_created_event(page)
+        task = send_email.delay(page.id)
+        task.wait()
 
     @action(detail=True, methods=['post'], url_path='like')
     def post_like(self, request, pk):
@@ -56,6 +54,7 @@ class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
         check_owner_page(page, request.user)
         post.likes.add(page)
         count_likes = post.total_likes
+        publish_like_created_event(page)
         return Response(status=status.HTTP_200_OK, data=count_likes)
 
     @action(detail=True, methods=['post'], url_path='dislike')
@@ -70,6 +69,7 @@ class PostViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
         check_owner_page(page, request.user)
         post.likes.remove(page)
         count_likes = post.total_likes
+        publish_like_deleted_event()
         return Response(status=status.HTTP_200_OK, data=count_likes)
 
     @action(detail=True, methods=['get'], url_path='liked-post')

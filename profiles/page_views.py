@@ -1,6 +1,8 @@
 from rest_framework import mixins, viewsets
 from profiles.permissions import PagePermission
 from rest_framework import filters
+from profiles.presigned_url import generate_presigned_url, upload_image
+from profiles.producer import publish_page_created_event
 
 from profiles.serializers import CreatePageSerializer, ShowPageSerializer, EditPageSerializer
 from profiles.models import Page, User
@@ -11,8 +13,8 @@ class PageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
     serializer_class = ShowPageSerializer
     queryset = Page.objects
     permission_classes = (PagePermission,)
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', '=uuid', '=tags__name', 'owner__username']
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name', '=uuid', '=tags__name', 'owner__username')
 
     def get_queryset(self):
         if self.action == "list":
@@ -28,4 +30,6 @@ class PageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.UpdateM
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        # filename = upload_image(self.request.FILES["image"])
+        page = serializer.save(owner=self.request.user)
+        publish_page_created_event(page)
